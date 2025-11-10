@@ -127,11 +127,20 @@ const Navbar: React.FC = () => {
           )}
         </div>
 
-        {/* Right Button */}
-        <div className="hidden md:block">
-          <button className="bg-[#001f3f] text-white px-5 py-2 rounded-md hover:bg-[#005f99] transition-all">
-            Get Quote
-          </button>
+        {/* Right Buttons */}
+        <div className="hidden md:flex space-x-4">
+          <Link
+            href="/login"
+            className="px-5 py-2 border border-[#001f3f] text-[#001f3f] rounded-md hover:bg-[#001f3f] hover:text-white transition-all"
+          >
+            Login
+          </Link>
+          <Link
+            href="/register"
+            className="px-5 py-2 bg-[#001f3f] text-white rounded-md hover:bg-[#005f99] transition-all"
+          >
+            Register
+          </Link>
         </div>
 
         {/* Mobile Toggle */}
@@ -155,9 +164,19 @@ const Navbar: React.FC = () => {
               {item.name}
             </Link>
           ))}
-          <button className="bg-[#001f3f] text-white px-5 py-2 rounded-md mt-3 w-full">
-            Get Quote
-          </button>
+
+          <Link
+            href="/login"
+            className="block bg-white border border-[#001f3f] text-[#001f3f] px-5 py-2 rounded-md mt-3 w-full text-center hover:bg-[#001f3f] hover:text-white transition-all"
+          >
+            Login
+          </Link>
+          <Link
+            href="/register"
+            className="block bg-[#001f3f] text-white px-5 py-2 rounded-md mt-2 w-full text-center hover:bg-[#005f99] transition-all"
+          >
+            Register
+          </Link>
         </div>
       )}
     </header>

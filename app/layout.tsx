@@ -14,14 +14,11 @@ export const metadata: Metadata = {
     "One-stop site for all catering equipment, corporate hospitality, and event services.",
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body className={`${figtree.className} bg-gray-50 text-gray-900`}>
+        {/* Always render Navbar here */}
         <Navbar />
         <main className="pt-20">{children}</main>
       </body>
