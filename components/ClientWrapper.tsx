@@ -7,20 +7,25 @@ import { ReactNode } from "react";
 export default function ClientWrapper({ children }: { children: ReactNode }) {
   const pathname = usePathname();
 
-  // Add all auth routes here
-  const authRoutes = [
+  // Routes where Navbar/Footer should be hidden
+  const hideNavbarFooterRoutes = [
     "/login",
     "/register",
     "/forgot-password",
     "/reset-password",
+    "/admin",          // All admin pages
+    "/admin/",         // Ensure subpaths also match
   ];
 
-  const hideNavbar = authRoutes.some((route) => pathname.startsWith(route));
+  const hideNavbarFooter = hideNavbarFooterRoutes.some((route) =>
+    pathname.startsWith(route)
+  );
 
   return (
     <>
-      {!hideNavbar && <Navbar />}
-      <main className={!hideNavbar ? "pt-20" : ""}>{children}</main>
+      {!hideNavbarFooter && <Navbar />}
+      <main className={!hideNavbarFooter ? "pt-20" : ""}>{children}</main>
+      
     </>
   );
 }
