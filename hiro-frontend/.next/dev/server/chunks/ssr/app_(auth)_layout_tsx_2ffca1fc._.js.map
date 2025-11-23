@@ -1,6 +1,0 @@
-{
-  "version": 3,
-  "sources": [],
-  "sections": [
-    {"offset": {"line": 4, "column": 0}, "map": {"version":3,"sources":["file:///home/essy/Betty/myhiroproject/hiro-frontend/app/%28auth%29/layout.tsx"],"sourcesContent":["import \"../globals.css\";\nimport { Figtree } from \"next/font/google\";\nimport { ReactNode } from \"react\";\n\nconst figtree = Figtree({\n  subsets: [\"latin\"],\n  weight: [\"400\", \"500\", \"600\", \"700\"],\n});\n\nexport default function AuthLayout({ children }: { children: ReactNode }) {\n  return (\n    <main\n      className={`${figtree.className} min-h-screen flex items-center justify-center bg-gradient-to-b from-[#001f3f] via-[#4da6ff] to-[#e6f2ff] p-6`}\n    >\n      <div className=\"w-full max-w-md p-10 bg-white bg-opacity-95 backdrop-blur-md shadow-2xl rounded-3xl\">\n        {children}\n      </div>\n    </main>\n  );\n}\n"],"names":[],"mappings":";;;;;;;;;AASe,SAAS,WAAW,EAAE,QAAQ,EAA2B;IACtE,qBACE,8OAAC;QACC,WAAW,GAAG,sJAAO,CAAC,SAAS,CAAC,6GAA6G,CAAC;kBAE9I,cAAA,8OAAC;YAAI,WAAU;sBACZ;;;;;;;;;;;AAIT","debugId":null}}]
-}
