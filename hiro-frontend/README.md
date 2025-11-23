@@ -34,3 +34,30 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+
+## Axios Integration & axiosInstance Explained
+
+### Why We Use axiosInstance Instead of Hardcoding Requests
+axiosInstance is a pre-configured Axios client that lets you:
+- Set a base URL once: No need to hardcode "http://localhost:5000/api" everywhere. All API calls automatically prepend the base URL.
+- Attach auth tokens automatically: If a user is logged in, their JWT token is added to every request header (Authorization: Bearer <token>), so protected routes just work.
+- Centralized error handling: If a token expires or becomes invalid (401 Unauthorized), the user is logged out and redirected to /login. This avoids repeating token logic in every component.
+
+Basically, axiosInstance acts as a ready-to-use bridge between your frontend and backend with all repetitive setup handled in one place.
+
+### Example 1: Login Page (/login)
+- How it works:
+  - Sends a POST request to /auth/login via axiosInstance.
+  - On success:
+       - Saves the token and user role in localStorage.
+       - Redirects based on role (admin → /admin, regular users → previous page or /).
+  - Handles errors (server messages or generic login failures) automatically
+```
+const res = await axiosInstance.post("/auth/login", formData);
+const { token, user } = res.data;
+localStorage.setItem("authToken", token);
+localStorage.setItem("userRole", user.role);
+```
+
+This demonstrates how axiosInstance makes authenticated requests seamless and reduces boilerplate.
