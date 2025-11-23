@@ -1,0 +1,26 @@
+# Next.js build output
+.next/
+out/
+build/
+dist/
+cache/
+logs/
+server/
+static/
+types/
+trace/
+*.log
+
+# Next.js manifests
+build-manifest.json
+fallback-build-manifest.json
+prerender-manifest.json
+routes-manifest.json
+
+# Dependencies
+node_modules/
+
+# Misc
+.DS_Store
+*.tsbuildinfo
+.next/
