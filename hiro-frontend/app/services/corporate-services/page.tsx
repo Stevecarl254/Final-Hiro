@@ -61,7 +61,7 @@ const CorporateServicesPage: React.FC = () => {
         >
           <div className="md:w-1/2 w-full">
             <img
-              src="/setup.jpeg"
+              src="/image 1.jpeg"
               alt="Corporate Event"
               className="w-full h-64 md:h-80 object-cover rounded-2xl shadow-lg"
             />

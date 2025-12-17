@@ -59,7 +59,7 @@ export default function BookingSection() {
           variants={buttonVariants}
           className="mt-6"
         >
-          <Link href="/booking">
+          <Link href="/get-quote">
             <button className="bg-white text-[#001f3f] px-12 py-4 rounded-full font-semibold text-lg shadow-lg hover:bg-gray-100 transition-all duration-300">
               Book Now
             </button>

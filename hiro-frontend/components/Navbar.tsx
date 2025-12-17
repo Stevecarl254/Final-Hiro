@@ -4,15 +4,17 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { Menu, X, ChevronDown } from "lucide-react";
 import { UserCircleIcon } from "@heroicons/react/24/outline";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 
 const Navbar: React.FC = () => {
   const router = useRouter();
+  const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [active, setActive] = useState<string>("Home");
+  const [activeService, setActiveService] = useState<string>(""); // <-- new
 
   // User state
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -83,6 +85,42 @@ const Navbar: React.FC = () => {
     { name: "Repairing Catering Equipment", path: "/services/repairing-catering-equipment" },
   ];
 
+  // Sync active state with current pathname
+  useEffect(() => {
+    switch (pathname) {
+      case "/":
+        setActive("Home");
+        setActiveService("");
+        break;
+      case "/about":
+        setActive("About");
+        setActiveService("");
+        break;
+      case "/gallery":
+        setActive("Gallery");
+        setActiveService("");
+        break;
+      case "/get-quote":
+        setActive("Get Quote");
+        setActiveService("");
+        break;
+      case "/contact":
+        setActive("Contact");
+        setActiveService("");
+        break;
+      default:
+        if (pathname.startsWith("/services")) {
+          setActive("Services");
+          const matchedService = services.find((s) => pathname.startsWith(s.path));
+          setActiveService(matchedService ? matchedService.name : "");
+        } else {
+          setActive("");
+          setActiveService("");
+        }
+        break;
+    }
+  }, [pathname]);
+
   return (
     <header
       className={`fixed w-full z-50 transition-all duration-300 ${
@@ -125,7 +163,9 @@ const Navbar: React.FC = () => {
                     <Link
                       key={service.name}
                       href={service.path}
-                      className="block px-4 py-2 text-sm text-[#001f3f] hover:bg-gray-100"
+                      className={`block px-4 py-2 text-sm text-[#001f3f] hover:bg-gray-100 ${
+                        activeService === service.name ? "text-[#5cc3ff]" : ""
+                      }`}
                       onClick={() => handleLinkClick("Services")}
                     >
                       {service.name}
@@ -221,7 +261,9 @@ const Navbar: React.FC = () => {
               key={item.name}
               href={item.path === "#" ? "/" : item.path}
               onClick={() => handleLinkClick(item.name)}
-              className="block text-[#001f3f] font-medium hover:text-[#005f99]"
+              className={`block text-[#001f3f] font-medium hover:text-[#005f99] ${
+                active === item.name ? "text-[#5cc3ff]" : ""
+              }`}
             >
               {item.name}
             </Link>

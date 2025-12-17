@@ -9,7 +9,7 @@ const galleryItems = [
     title: "Elegant Buffet Setup",
     description:
       "A modern buffet arrangement featuring stylish plating and exquisite attention to detail.",
-    image: "/gallery1.jpg", // replace with your actual image
+    image: "/buffet.jpeg", // replace with your actual image
   },
   {
     id: 2,
@@ -23,7 +23,7 @@ const galleryItems = [
     title: "Fine Dining Experience",
     description:
       "A premium indoor dining setup, showcasing Hiro’s attention to ambiance and excellence.",
-    image: "/dining.jpeg",
+    image: "/hero.jpeg",
   },
 ];
 
