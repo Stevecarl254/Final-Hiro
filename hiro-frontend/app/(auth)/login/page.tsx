@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Mail, Lock, ArrowLeft } from "lucide-react";
+import { Mail, Lock, ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import axiosInstance from "@/lib/axiosInstance";
@@ -14,6 +14,7 @@ export default function LoginPage() {
     password: "",
   });
 
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -38,7 +39,7 @@ export default function LoginPage() {
         return;
       }
 
-      // Save everything the navbar expects
+      // Save auth info
       localStorage.setItem("authToken", token);
       localStorage.setItem("userRole", user.role);
       localStorage.setItem("userName", user.name);
@@ -46,10 +47,7 @@ export default function LoginPage() {
       // Redirect by role
       router.push(user.role === "admin" ? "/admin" : "/");
     } catch (err: any) {
-      const msg =
-        err.response?.data?.message ||
-        "Login failed. Check your credentials.";
-      setError(msg);
+      setError(err.response?.data?.message || "Login failed. Check your credentials.");
     }
   };
 
@@ -63,14 +61,10 @@ export default function LoginPage() {
           <ArrowLeft className="w-5 h-5 mr-1" /> Back
         </button>
 
-        <h2 className="text-3xl font-bold text-center text-[#001f3f] mb-6 mt-2">
-          Login
-        </h2>
+        <h2 className="text-3xl font-bold text-center text-[#001f3f] mb-6 mt-2">Login</h2>
 
         {error && (
-          <p className="text-red-500 text-sm mb-3 text-center font-medium">
-            {error}
-          </p>
+          <p className="text-red-500 text-sm mb-3 text-center font-medium">{error}</p>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -90,7 +84,7 @@ export default function LoginPage() {
           <div className="relative">
             <Lock className="absolute top-3 left-3 w-5 h-5 text-[#4da6ff]" />
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
               name="password"
               required
               value={formData.password}
@@ -98,6 +92,13 @@ export default function LoginPage() {
               placeholder="Password *"
               className="w-full border border-[#4da6ff] rounded-xl px-10 py-3 focus:outline-none focus:ring-2 focus:ring-[#001f3f] transition"
             />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-3 text-gray-400"
+            >
+              {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+            </button>
           </div>
 
           <button

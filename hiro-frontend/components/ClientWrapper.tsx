@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import Navbar from "./Navbar";
+import Footer from "./FooterSection";
 import { ReactNode } from "react";
 
 export default function ClientWrapper({ children }: { children: ReactNode }) {
@@ -13,19 +14,22 @@ export default function ClientWrapper({ children }: { children: ReactNode }) {
     "/register",
     "/forgot-password",
     "/reset-password",
-    "/admin",          // All admin pages
-    "/admin/",         // Ensure subpaths also match
+    "/admin",
+    "/profile",
   ];
 
+  // Exact match or subpaths
   const hideNavbarFooter = hideNavbarFooterRoutes.some((route) =>
-    pathname.startsWith(route)
+    pathname === route || pathname.startsWith(route + "/")
   );
 
   return (
     <>
       {!hideNavbarFooter && <Navbar />}
-      <main className={!hideNavbarFooter ? "pt-20" : ""}>{children}</main>
-      
+      <main className={!hideNavbarFooter ? "pt-20 min-h-[calc(100vh-80px)]" : "min-h-screen"}>
+        {children}
+      </main>
+      {!hideNavbarFooter && <Footer />}
     </>
   );
 }

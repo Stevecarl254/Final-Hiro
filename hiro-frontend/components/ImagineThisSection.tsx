@@ -10,7 +10,7 @@ const content = {
   subheading: "More Than Just Food",
   description:
     "At Hiro Catering, we create unforgettable experiences, blending exquisite food, elegant presentation, and warm hospitality to make your events truly special.",
-  imageSrc: "/imagine-this.jpg", // Replace with your image path
+  imageSrc: "/setup.jpeg", // Replace with your image path
   imageAlt: "Elegant catering setup",
 };
 

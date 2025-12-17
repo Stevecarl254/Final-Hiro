@@ -12,7 +12,6 @@ const Navbar: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
-
   const [active, setActive] = useState<string>("Home");
 
   // User state
@@ -28,31 +27,24 @@ const Navbar: React.FC = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Read user from localStorage
+  // Load user from localStorage
   useEffect(() => {
     const token = localStorage.getItem("authToken");
     const storedUser = localStorage.getItem("userName");
 
     if (token && storedUser) {
       setIsLoggedIn(true);
-      // Only take the first name
-      setUserName(storedUser.split(" ")[0]);
+      setUserName(storedUser.split(" ")[0]); // only first name
     }
   }, []);
 
-  // Close dropdowns on outside-click
+  // Close dropdowns on outside click
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(e.target as Node)
-      ) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setDropdownOpen(false);
       }
-      if (
-        profileRef.current &&
-        !profileRef.current.contains(e.target as Node)
-      ) {
+      if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
         setProfileOpen(false);
       }
     };
@@ -98,11 +90,6 @@ const Navbar: React.FC = () => {
           ? "bg-gray-200/40 backdrop-blur-lg shadow-sm border-b border-white/30"
           : "bg-gray-200"
       }`}
-      style={{
-        backgroundImage: isScrolled
-          ? "linear-gradient(to right, rgba(255,255,255,0.6), rgba(255,255,255,0.3))"
-          : "none",
-      }}
     >
       <nav className="max-w-7xl mx-auto flex items-center justify-between px-6 py-3 font-['Figtree']">
         {/* Logo */}
@@ -163,8 +150,6 @@ const Navbar: React.FC = () => {
 
         {/* Right side */}
         <div className="hidden md:flex items-center space-x-6">
-
-          {/* If logged out → show Login + Register */}
           {!isLoggedIn && (
             <>
               <Link
@@ -182,7 +167,6 @@ const Navbar: React.FC = () => {
             </>
           )}
 
-          {/* If logged in → show Welcome + Profile */}
           {isLoggedIn && (
             <div className="flex items-center space-x-3" ref={profileRef}>
               <span className="text-[#001f3f] font-medium">
@@ -190,18 +174,13 @@ const Navbar: React.FC = () => {
               </span>
 
               <div className="relative">
-                <button
-                  onClick={() => setProfileOpen(!profileOpen)}
-                  className="relative"
-                >
-                  <UserCircleIcon
-                    className="w-8 h-8 text-[#001f3f] hover:text-[#005f99] transition relative translate-y-1"
-                  />
+                <button onClick={() => setProfileOpen(!profileOpen)}>
+                  <UserCircleIcon className="w-8 h-8 text-[#001f3f] hover:text-[#005f99] transition" />
                 </button>
 
                 {/* Dropdown */}
                 <div
-                  className={`absolute right-0 mt-3 w-48 bg-white shadow-lg rounded-md border border-gray-100 transition-all duration-300 ${
+                  className={`absolute right-0 mt-3 w-36 bg-white shadow-lg rounded-md border border-gray-100 transition-all duration-300 ${
                     profileOpen
                       ? "opacity-100 translate-y-0 visible"
                       : "opacity-0 -translate-y-2 invisible"
@@ -212,18 +191,6 @@ const Navbar: React.FC = () => {
                     className="block px-4 py-2 text-sm hover:bg-gray-100"
                   >
                     Profile
-                  </Link>
-                  <Link
-                    href="/bookings"
-                    className="block px-4 py-2 text-sm hover:bg-gray-100"
-                  >
-                    Bookings
-                  </Link>
-                  <Link
-                    href="/settings"
-                    className="block px-4 py-2 text-sm hover:bg-gray-100"
-                  >
-                    Settings
                   </Link>
 
                   <button
@@ -280,24 +247,11 @@ const Navbar: React.FC = () => {
           {isLoggedIn && (
             <>
               <p className="mt-3 text-[#001f3f]">Welcome, {userName}</p>
-
               <Link
                 href="/profile"
                 className="block px-3 py-2 text-[#001f3f]"
               >
                 Profile
-              </Link>
-              <Link
-                href="/bookings"
-                className="block px-3 py-2 text-[#001f3f]"
-              >
-                Bookings
-              </Link>
-              <Link
-                href="/settings"
-                className="block px-3 py-2 text-[#001f3f]"
-              >
-                Settings
               </Link>
 
               <button

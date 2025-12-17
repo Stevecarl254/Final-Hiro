@@ -16,14 +16,14 @@ const galleryItems = [
     title: "Outdoor Event Perfection",
     description:
       "Our outdoor catering setup designed to impress guests with charm and class.",
-    image: "/gallery2.jpg",
+    image: "/outdoor.jpeg",
   },
   {
     id: 3,
     title: "Fine Dining Experience",
     description:
       "A premium indoor dining setup, showcasing Hiro’s attention to ambiance and excellence.",
-    image: "/gallery3.jpg",
+    image: "/dining.jpeg",
   },
 ];
 

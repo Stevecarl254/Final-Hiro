@@ -1,25 +1,59 @@
 "use client";
 
-import React from "react";
-import { MapPin, Phone, Mail, MessageCircle } from "lucide-react";
+import React, { useState } from "react";
+import axios from "axios";
+import { MapPin, Phone, Mail, MessageCircle, CheckCircle } from "lucide-react";
 
 const ContactPage: React.FC = () => {
+  const [formData, setFormData] = useState({
+    fullName: "",
+    email: "",
+    subject: "",
+    message: "",
+  });
+
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+
+    try {
+      await axios.post("http://localhost:5000/api/messages", formData);
+      setSuccess(true);
+      setFormData({ fullName: "", email: "", subject: "", message: "" });
+    } catch (err) {
+      setError("Failed to send message. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900 relative">
-      {/* Contact Info + Form Section */}
+      {/* Contact Info + Form */}
       <section className="max-w-6xl mx-auto py-20 px-6 grid md:grid-cols-2 gap-12">
         {/* Contact Info */}
         <div className="space-y-8">
           <h2 className="text-4xl font-bold text-[#001f3f]">Get in Touch</h2>
           <p className="text-gray-700">
-            We’d love to hear from you! Reach out with any questions, feedback, or partnership inquiries.
+            Have a question or need more information? Send us a message and we’ll
+            get back to you shortly.
           </p>
 
-          {/* Contact Details */}
           <div className="space-y-4">
             <div className="flex items-center gap-4">
               <MapPin className="w-6 h-6 text-[#001f3f]" />
-              <span>123 Main Street, Nairobi, Kenya</span>
+              <span>Nairobi, Kenya</span>
             </div>
             <div className="flex items-center gap-4">
               <Phone className="w-6 h-6 text-[#001f3f]" />
@@ -31,85 +65,105 @@ const ContactPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Optional Instructions */}
-          <p className="text-gray-600 mt-6">
-            Fill out the form and we will get back to you within 24 hours. You can also reach us via call or message using the floating button.
+          <p className="text-gray-600">
+            We typically respond within 24 hours.
           </p>
         </div>
 
         {/* Contact Form */}
-        <form className="bg-white p-8 rounded-xl shadow-lg space-y-6">
-          <div className="flex flex-col">
-            <label htmlFor="name" className="text-gray-700 font-medium mb-2">Full Name</label>
+        <form
+          onSubmit={handleSubmit}
+          className="bg-white p-8 rounded-2xl shadow-lg space-y-6 relative"
+        >
+          {/* Success Message */}
+          {success && (
+            <div className="absolute inset-0 bg-white/95 flex flex-col items-center justify-center rounded-2xl">
+              <CheckCircle className="w-16 h-16 text-green-500 mb-4 animate-bounce" />
+              <h3 className="text-2xl font-bold text-[#001f3f]">
+                Message Sent!
+              </h3>
+              <p className="text-gray-600 mt-2 text-center">
+                Thank you for reaching out. We’ll get back to you soon.
+              </p>
+            </div>
+          )}
+
+          <div>
+            <label className="font-medium">Full Name</label>
             <input
-              type="text"
-              id="name"
+              name="fullName"
+              value={formData.fullName}
+              onChange={handleChange}
+              required
+              className="w-full mt-2 border rounded-md px-4 py-2 focus:ring-2 focus:ring-[#00b8e6]"
               placeholder="Your full name"
-              className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#00b8e6]"
             />
           </div>
-          <div className="flex flex-col">
-            <label htmlFor="email" className="text-gray-700 font-medium mb-2">Email</label>
+
+          <div>
+            <label className="font-medium">Email</label>
             <input
+              name="email"
               type="email"
-              id="email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+              className="w-full mt-2 border rounded-md px-4 py-2 focus:ring-2 focus:ring-[#00b8e6]"
               placeholder="Your email address"
-              className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#00b8e6]"
             />
           </div>
-          <div className="flex flex-col">
-            <label htmlFor="subject" className="text-gray-700 font-medium mb-2">Subject</label>
+
+          <div>
+            <label className="font-medium">Subject</label>
             <input
-              type="text"
-              id="subject"
+              name="subject"
+              value={formData.subject}
+              onChange={handleChange}
+              required
+              className="w-full mt-2 border rounded-md px-4 py-2 focus:ring-2 focus:ring-[#00b8e6]"
               placeholder="Subject"
-              className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#00b8e6]"
             />
           </div>
-          <div className="flex flex-col">
-            <label htmlFor="message" className="text-gray-700 font-medium mb-2">Message</label>
+
+          <div>
+            <label className="font-medium">Message</label>
             <textarea
-              id="message"
+              name="message"
+              value={formData.message}
+              onChange={handleChange}
+              required
+              rows={5}
+              className="w-full mt-2 border rounded-md px-4 py-2 focus:ring-2 focus:ring-[#00b8e6]"
               placeholder="Your message"
-              className="border border-gray-300 rounded-md px-4 py-2 h-32 resize-none focus:outline-none focus:ring-2 focus:ring-[#00b8e6]"
-            ></textarea>
+            />
           </div>
+
+          {error && <p className="text-red-600 text-sm">{error}</p>}
+
           <button
             type="submit"
-            className="w-full bg-[#001f3f] text-white font-semibold py-3 rounded-md hover:bg-[#00b8e6] hover:text-[#001f3f] transition-all duration-300 shadow"
+            disabled={loading}
+            className="w-full bg-[#001f3f] text-white py-3 rounded-md font-semibold hover:bg-[#00b8e6] hover:text-[#001f3f] transition"
           >
-            Send Message
+            {loading ? "Sending..." : "Send Message"}
           </button>
         </form>
       </section>
 
-      {/* Map Section */}
-      <section className="w-full h-80 md:h-96">
-        <iframe
-          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3988.839604515482!2d36.8219460757436!3d-1.292065998946574!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x182f10b3fba7a95f%3A0x8f1f8b1bde7dbb32!2sNairobi%2C%20Kenya!5e0!3m2!1sen!2sus!4v1698687923456!5m2!1sen!2sus"
-          className="w-full h-full border-0"
-          allowFullScreen
-          loading="lazy"
-          referrerPolicy="no-referrer-when-downgrade"
-        ></iframe>
-      </section>
-
-      {/* Floating Call/Message Button */}
+      {/* Floating Buttons */}
       <div className="fixed bottom-6 right-6 flex flex-col gap-4 z-50">
         <a
           href="tel:+254700123456"
-          className="bg-[#00b8e6] text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg hover:bg-[#001f3f] transition"
-          title="Call Now"
+          className="bg-[#00b8e6] w-14 h-14 rounded-full flex items-center justify-center text-white shadow-lg hover:bg-[#001f3f]"
         >
-          <Phone className="w-6 h-6" />
+          <Phone />
         </a>
         <a
           href="https://wa.me/254700123456"
           target="_blank"
-          className="bg-[#00b8e6] text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg hover:bg-[#001f3f] transition"
-          title="Message on WhatsApp"
+          className="bg-[#00b8e6] w-14 h-14 rounded-full flex items-center justify-center text-white shadow-lg hover:bg-[#001f3f]"
         >
-          <MessageCircle className="w-6 h-6" />
+          <MessageCircle />
         </a>
       </div>
     </div>

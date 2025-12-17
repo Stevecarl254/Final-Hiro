@@ -6,7 +6,7 @@ import WhyHiroSection from "@/components/WhyHeroSection";
 import TestimonialsSection from "@/components/TestimonialsSection";
 import GallerySection from "@/components/GallerySection";
 import BookingSection from "@/components/BookingSection";
-import FooterSection from "@/components/FooterSection";
+
 export default function Home() {
   return (
     <main className="min-h-screen">
@@ -18,7 +18,7 @@ export default function Home() {
       <TestimonialsSection/>
       <GallerySection/>
       <BookingSection/>
-      <FooterSection/>
+      
     </main>
   );
 }

@@ -17,9 +17,9 @@ async function createAdmin() {
 
     const admin = new User({
       name: "Super Admin",
-      email: "admin@hiro.com",
-      password: "AdminStrongPassword123",
-      phoneNumber: "0700000000",
+      email: "mediakenyahome@gmail.com",
+      password: "Stephenmaisiba11",
+      phoneNumber: "0796273218",
       role: "admin"
     });
 

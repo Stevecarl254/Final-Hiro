@@ -15,7 +15,7 @@ export default function AboutPage() {
             transition={{ duration: 0.8 }}
           >
             <Image
-              src="/chef-team.jpg"
+              src="/about.jpeg"
               alt="Hiro Catering Team"
               width={600}
               height={400}

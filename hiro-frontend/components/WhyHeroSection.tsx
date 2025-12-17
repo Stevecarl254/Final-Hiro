@@ -37,6 +37,7 @@ export default function WhyHiroSection() {
       className="relative py-24 font-['Figtree'] overflow-hidden bg-gray-100 bg-[url('/rough-texture.png')]"
     >
       <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center gap-12">
+        
         {/* Left: List */}
         <motion.div
           className="flex-1"
@@ -63,18 +64,23 @@ export default function WhyHiroSection() {
           </ul>
         </motion.div>
 
-        {/* Right: Empty placeholder for future image */}
+        {/* Right: Image */}
         <motion.div
-          className="flex-1 w-full h-80 md:h-96 rounded-3xl border-2 border-dashed border-gray-300 flex items-center justify-center"
-          initial={{ opacity: 0 }}
+          className="flex-1 w-full max-w-md aspect-square rounded-2xl overflow-hidden shadow-lg"
+          initial="hidden"
           animate={controls}
           variants={{
             hidden: { opacity: 0 },
             visible: { opacity: 1, transition: { duration: 0.6 } },
           }}
         >
-          <span className="text-gray-400">Image placeholder</span>
+          <img
+            src="/why hiro.jpg"
+            alt="Why Hiro Catering"
+            className="w-full h-full object-cover"
+          />
         </motion.div>
+
       </div>
     </section>
   );
