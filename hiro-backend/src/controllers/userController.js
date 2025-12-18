@@ -64,12 +64,13 @@ export const loginUser = async (req, res) => {
 
     const token = generateToken(user._id, user.role);
 
+    // Send **full name** in the response for frontend
     res.status(200).json({
       message: "Login successful",
       token,
       user: {
         id: user._id,
-        name: user.name,
+        name: user.name, // <-- full name returned
         email: user.email,
         phoneNumber: user.phoneNumber,
         role: user.role,
@@ -82,10 +83,11 @@ export const loginUser = async (req, res) => {
 
 /* ================= GET PROFILE ================= */
 export const getCurrentUser = async (req, res) => {
+  // Ensure we return full name
   res.status(200).json({
     user: {
       id: req.user._id,
-      name: req.user.name,
+      name: req.user.name, // <-- full name included
       email: req.user.email,
       phoneNumber: req.user.phoneNumber,
       address: req.user.address || "",
@@ -104,7 +106,6 @@ export const updateCurrentUser = async (req, res) => {
 
     let updated = false;
 
-    // Update profile fields only if changed
     if (name && name !== user.name) {
       user.name = name;
       updated = true;
@@ -118,7 +119,6 @@ export const updateCurrentUser = async (req, res) => {
       updated = true;
     }
 
-    // Password change
     if (currentPassword || newPassword) {
       if (!currentPassword || !newPassword) {
         return res.status(400).json({
@@ -142,7 +142,6 @@ export const updateCurrentUser = async (req, res) => {
           message: "New password cannot be the same as current password.",
         });
 
-      // Hash new password
       const salt = await bcrypt.genSalt(10);
       user.password = await bcrypt.hash(newPassword, salt);
 

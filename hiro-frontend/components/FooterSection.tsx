@@ -51,10 +51,9 @@ export default function Footer() {
             {[
               "Home",
               "About Us",
-              "Menu",
               "Services",
               "Gallery",
-              "Testimonials",
+              "Get Quote",
               "Contact Us",
             ].map((link) => (
               <li key={link}>
@@ -77,7 +76,7 @@ export default function Footer() {
           <ul className="space-y-3 text-sm">
             <li className="flex items-center gap-2">
               <Phone size={16} className="text-[#00b8e6]" />
-              <span>+254 712 345 678</span>
+              <span>+254 722 440 643</span>
             </li>
             <li className="flex items-center gap-2">
               <Mail size={16} className="text-[#00b8e6]" />

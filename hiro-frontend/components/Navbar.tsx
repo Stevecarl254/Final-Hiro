@@ -13,15 +13,17 @@ const Navbar: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [mobileServiceOpen, setMobileServiceOpen] = useState(false);
+  const [mobileProfileOpen, setMobileProfileOpen] = useState(false);
   const [active, setActive] = useState<string>("Home");
-  const [activeService, setActiveService] = useState<string>(""); // <-- new
+  const [activeService, setActiveService] = useState<string>("");
 
-  // User state
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userName, setUserName] = useState("");
 
   const dropdownRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
+  const mobileProfileRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
@@ -29,18 +31,15 @@ const Navbar: React.FC = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Load user from localStorage
   useEffect(() => {
     const token = localStorage.getItem("authToken");
     const storedUser = localStorage.getItem("userName");
-
     if (token && storedUser) {
       setIsLoggedIn(true);
-      setUserName(storedUser.split(" ")[0]); // only first name
+      setUserName(storedUser.split(" ")[0]);
     }
   }, []);
 
-  // Close dropdowns on outside click
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
@@ -48,6 +47,9 @@ const Navbar: React.FC = () => {
       }
       if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
         setProfileOpen(false);
+      }
+      if (mobileProfileRef.current && !mobileProfileRef.current.contains(e.target as Node)) {
+        setMobileProfileOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClick);
@@ -58,7 +60,6 @@ const Navbar: React.FC = () => {
     localStorage.removeItem("authToken");
     localStorage.removeItem("userName");
     localStorage.removeItem("userRole");
-
     setIsLoggedIn(false);
     router.push("/login");
   };
@@ -66,6 +67,7 @@ const Navbar: React.FC = () => {
   const handleLinkClick = (title: string) => {
     setActive(title);
     setIsOpen(false);
+    setMobileServiceOpen(false);
   };
 
   const navItems = [
@@ -85,7 +87,6 @@ const Navbar: React.FC = () => {
     { name: "Repairing Catering Equipment", path: "/services/repairing-catering-equipment" },
   ];
 
-  // Sync active state with current pathname
   useEffect(() => {
     switch (pathname) {
       case "/":
@@ -130,9 +131,14 @@ const Navbar: React.FC = () => {
       }`}
     >
       <nav className="max-w-7xl mx-auto flex items-center justify-between px-6 py-3 font-['Figtree']">
-        {/* Logo */}
-        <div className="text-2xl font-bold text-[#001f3f]">Hiro Catering</div>
-
+     {/* Logo */}
+<Link href="/" className="flex items-center">
+  <img
+    src="/logo.png"
+    alt="Hiro Catering"
+    className="h-14 w-auto object-contain scale-180"
+  />
+</Link>
         {/* Desktop Menu */}
         <div className="hidden md:flex items-center space-x-10">
           {navItems.map((item) =>
@@ -209,16 +215,13 @@ const Navbar: React.FC = () => {
 
           {isLoggedIn && (
             <div className="flex items-center space-x-3" ref={profileRef}>
-              <span className="text-[#001f3f] font-medium">
-                Welcome, {userName}
-              </span>
-
+              <span className="text-[#001f3f] font-medium">Welcome, {userName}</span>
               <div className="relative">
                 <button onClick={() => setProfileOpen(!profileOpen)}>
                   <UserCircleIcon className="w-8 h-8 text-[#001f3f] hover:text-[#005f99] transition" />
                 </button>
 
-                {/* Dropdown */}
+                {/* Profile Dropdown */}
                 <div
                   className={`absolute right-0 mt-3 w-36 bg-white shadow-lg rounded-md border border-gray-100 transition-all duration-300 ${
                     profileOpen
@@ -245,8 +248,32 @@ const Navbar: React.FC = () => {
           )}
         </div>
 
-        {/* Mobile Toggle */}
-        <div className="md:hidden text-[#001f3f]">
+        {/* Mobile Toggle with Profile */}
+        <div className="md:hidden flex items-center gap-3">
+          {isLoggedIn && (
+            <div className="relative" ref={mobileProfileRef}>
+              <button onClick={() => setMobileProfileOpen(!mobileProfileOpen)}>
+                <UserCircleIcon className="w-8 h-8 text-[#001f3f] hover:text-[#005f99] transition" />
+              </button>
+              {mobileProfileOpen && (
+                <div className="absolute right-0 mt-2 w-36 bg-white shadow-lg rounded-md border border-gray-100 z-50">
+                  <Link
+                    href="/profile"
+                    className="block px-4 py-2 text-sm hover:bg-gray-100"
+                  >
+                    Profile
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
           <button onClick={() => setIsOpen(!isOpen)}>
             {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
@@ -256,18 +283,48 @@ const Navbar: React.FC = () => {
       {/* Mobile Menu */}
       {isOpen && (
         <div className="md:hidden bg-gray-100 px-6 py-3 space-y-2">
-          {navItems.map((item) => (
-            <Link
-              key={item.name}
-              href={item.path === "#" ? "/" : item.path}
-              onClick={() => handleLinkClick(item.name)}
-              className={`block text-[#001f3f] font-medium hover:text-[#005f99] ${
-                active === item.name ? "text-[#5cc3ff]" : ""
-              }`}
-            >
-              {item.name}
-            </Link>
-          ))}
+          {navItems.map((item) =>
+            item.name === "Services" ? (
+              <div key="mobile-services" className="space-y-1">
+                <button
+                  onClick={() => setMobileServiceOpen(!mobileServiceOpen)}
+                  className="flex justify-between w-full text-[#001f3f] font-medium px-3 py-2 hover:text-[#005f99]"
+                >
+                  Services
+                  <ChevronDown
+                    className={`w-4 h-4 transition-transform duration-300 ${
+                      mobileServiceOpen ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+                {mobileServiceOpen && (
+                  <div className="pl-4 space-y-1">
+                    {services.map((service) => (
+                      <Link
+                        key={service.name}
+                        href={service.path}
+                        onClick={() => handleLinkClick("Services")}
+                        className="block text-[#001f3f] text-sm py-1 hover:text-[#005f99]"
+                      >
+                        {service.name}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Link
+                key={item.name}
+                href={item.path === "#" ? "/" : item.path}
+                onClick={() => handleLinkClick(item.name)}
+                className={`block text-[#001f3f] font-medium hover:text-[#005f99] ${
+                  active === item.name ? "text-[#5cc3ff]" : ""
+                }`}
+              >
+                {item.name}
+              </Link>
+            )
+          )}
 
           {!isLoggedIn && (
             <>
@@ -283,25 +340,6 @@ const Navbar: React.FC = () => {
               >
                 Register
               </Link>
-            </>
-          )}
-
-          {isLoggedIn && (
-            <>
-              <p className="mt-3 text-[#001f3f]">Welcome, {userName}</p>
-              <Link
-                href="/profile"
-                className="block px-3 py-2 text-[#001f3f]"
-              >
-                Profile
-              </Link>
-
-              <button
-                onClick={handleLogout}
-                className="block w-full text-left px-3 py-2 text-red-600"
-              >
-                Logout
-              </button>
             </>
           )}
         </div>

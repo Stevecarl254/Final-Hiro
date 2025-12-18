@@ -11,10 +11,12 @@ import {
   FaBars,
   FaImages,
   FaClipboardCheck,
+  FaSignOutAlt,
 } from "react-icons/fa";
 import Link from "next/link";
 import axios from "axios";
 import { io, Socket } from "socket.io-client";
+import { useRouter } from "next/navigation";
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -34,9 +36,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [newQuotesCount, setNewQuotesCount] = useState(0);
   const [newMessagesCount, setNewMessagesCount] = useState(0);
+  const [adminName, setAdminName] = useState<string>("Admin");
 
   const socketRef = useRef<Socket | null>(null);
   const isMountedRef = useRef(false);
+  const router = useRouter();
 
   /* =========================
      LOCAL STORAGE HELPERS
@@ -52,6 +56,29 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   };
 
   /* =========================
+     FETCH ADMIN INFO
+  ========================= */
+  const fetchAdminName = async () => {
+    const token = localStorage.getItem("authToken");
+    if (!token) {
+      handleLogout();
+      return;
+    }
+
+    try {
+      const res = await axios.get(`${API_BASE}/api/users/me`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const fullName = res.data.user?.name || "Admin";
+      const firstName = fullName.split(" ")[0];
+      setAdminName(firstName);
+    } catch (err) {
+      console.error("Failed to fetch admin info:", err);
+      handleLogout();
+    }
+  };
+
+  /* =========================
      INITIAL FETCH (ONCE)
   ========================= */
   const fetchInitialCounts = async () => {
@@ -64,13 +91,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       const quotes: Quote[] = quotesRes.data.data || [];
       const messages: Message[] = messagesRes.data.data || [];
 
-      const unseenQuotes = quotes.filter(
-        (q) => !getSeenQuotes().includes(q._id)
-      );
-
-      const unreadMessages = messages.filter(
-        (m) => !getReadMessages().includes(m._id)
-      );
+      const unseenQuotes = quotes.filter((q) => !getSeenQuotes().includes(q._id));
+      const unreadMessages = messages.filter((m) => !getReadMessages().includes(m._id));
 
       setNewQuotesCount(unseenQuotes.length);
       setNewMessagesCount(unreadMessages.length);
@@ -86,13 +108,10 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     if (isMountedRef.current) return;
     isMountedRef.current = true;
 
+    fetchAdminName();
     fetchInitialCounts();
 
-    const socket = io(API_BASE, {
-      transports: ["websocket"],
-      reconnection: true,
-    });
-
+    const socket = io(API_BASE, { transports: ["websocket"], reconnection: true });
     socketRef.current = socket;
 
     socket.on("newQuote", (quote: Quote) => {
@@ -114,42 +133,25 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   }, []);
 
   /* =========================
+     LOGOUT FUNCTION
+  ========================= */
+  const handleLogout = () => {
+    localStorage.removeItem("authToken");
+    router.push("/login");
+  };
+
+  /* =========================
      MENU CONFIG
   ========================= */
   const menuItems = [
     { name: "Dashboard", icon: <FaHome />, href: "/admin" },
-
-    {
-      name: "Equipment Bookings",
-      icon: <FaClipboardCheck />,
-      href: "/admin/equipment-bookings",
-    },
-
+    { name: "Equipment Bookings", icon: <FaClipboardCheck />, href: "/admin/equipment-bookings" },
     { name: "Staff", icon: <FaUsers />, href: "/admin/staff" },
-
-    {
-      name: "Equipment Management",
-      icon: <FaBoxOpen />,
-      href: "/admin/equipment",
-    },
-
-    {
-      name: "Quotes",
-      icon: <FaEnvelope />,
-      href: "/admin/quotes",
-      badge: newQuotesCount,
-    },
-
-    {
-      name: "Messages",
-      icon: <FaEnvelope />,
-      href: "/admin/messages",
-      badge: newMessagesCount,
-    },
-
+    { name: "Equipment Management", icon: <FaBoxOpen />, href: "/admin/equipment" },
+    { name: "Quotes", icon: <FaEnvelope />, href: "/admin/quotes", badge: newQuotesCount },
+    { name: "Messages", icon: <FaEnvelope />, href: "/admin/messages", badge: newMessagesCount },
     { name: "Gallery", icon: <FaImages />, href: "/admin/gallery" },
     { name: "Reports", icon: <FaFileAlt />, href: "/admin/reports" },
-    { name: "Settings", icon: <FaCog />, href: "/admin/settings" },
   ];
 
   /* =========================
@@ -158,19 +160,10 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   return (
     <div className="flex h-screen bg-gray-100">
       {/* Sidebar */}
-      <aside
-        className={`${
-          isSidebarOpen ? "w-64" : "w-20"
-        } bg-[#002366] text-white flex flex-col transition-all duration-300`}
-      >
+      <aside className={`${isSidebarOpen ? "w-64" : "w-20"} bg-[#002366] text-white flex flex-col transition-all duration-300`}>
         <div className="flex items-center justify-between p-4 border-b border-blue-400">
-          <span className={`text-xl font-bold ${!isSidebarOpen && "hidden"}`}>
-            Hiro Admin
-          </span>
-          <button
-            className="p-1 hover:bg-blue-500 rounded"
-            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-          >
+          <span className={`text-xl font-bold ${!isSidebarOpen && "hidden"}`}>Hiro Admin</span>
+          <button className="p-1 hover:bg-blue-500 rounded" onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
             <FaBars />
           </button>
         </div>
@@ -180,9 +173,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             <Link
               key={item.name}
               href={item.href}
-              className={`flex items-center gap-3 px-4 py-3 hover:bg-blue-700 ${
-                !isSidebarOpen ? "justify-center" : ""
-              } relative`}
+              className={`flex items-center gap-3 px-4 py-3 hover:bg-blue-700 ${!isSidebarOpen ? "justify-center" : ""} relative`}
             >
               {item.icon}
               {isSidebarOpen && <span>{item.name}</span>}
@@ -198,17 +189,18 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
       {/* Content */}
       <div className="flex-1 flex flex-col">
+        {/* Header */}
         <header className="flex items-center justify-between bg-white p-4 shadow">
-          <h1 className="text-xl font-semibold text-[#002366]">
-            Admin Dashboard
-          </h1>
+          <h1 className="text-xl font-semibold text-[#002366]">Admin Dashboard</h1>
           <div className="flex items-center gap-4">
-            <span className="text-gray-700 font-medium">Admin</span>
-            <img
-              src="/avatar.png"
-              alt="Admin"
-              className="w-10 h-10 rounded-full"
-            />
+            <span className="text-gray-700 font-medium">{adminName}</span>
+            <img src="/avatar.png" alt="Admin" className="w-10 h-10 rounded-full" />
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-1 px-3 py-1 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-full"
+            >
+              <FaSignOutAlt /> Logout
+            </button>
           </div>
         </header>
 

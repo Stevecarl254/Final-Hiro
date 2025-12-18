@@ -16,7 +16,7 @@ async function createAdmin() {
     }
 
     const admin = new User({
-      name: "Super Admin",
+      name: "Steve",
       email: "mediakenyahome@gmail.com",
       password: "Stephenmaisiba11",
       phoneNumber: "0796273218",

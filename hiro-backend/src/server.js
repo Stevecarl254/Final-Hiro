@@ -14,6 +14,7 @@ import quoteRoutes from "./routes/quoteRoutes.js";
 import messageRoutes from "./routes/messageRoutes.js";
 import equipmentRoutes from "./routes/equipmentRoutes.js";
 import equipmentBookingRoutes from "./routes/equipmentBookingsRoutes.js";
+import reportRoutes from "./routes/reportRoutes.js";
 
 import http from "http";
 import { Server } from "socket.io";
@@ -60,6 +61,7 @@ const startServer = async () => {
     app.use("/api/messages", messageRoutes);
     app.use("/api/equipment", equipmentRoutes);
     app.use("/api/equipment-bookings", equipmentBookingRoutes);
+    app.use("/api/reports", reportRoutes);
 
     // HTTP & Socket.IO setup
     const server = http.createServer(app);

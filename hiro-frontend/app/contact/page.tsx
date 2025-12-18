@@ -57,7 +57,7 @@ const ContactPage: React.FC = () => {
             </div>
             <div className="flex items-center gap-4">
               <Phone className="w-6 h-6 text-[#001f3f]" />
-              <span>+254 700 123 456</span>
+              <span>+254 722 440 643</span>
             </div>
             <div className="flex items-center gap-4">
               <Mail className="w-6 h-6 text-[#001f3f]" />
@@ -153,13 +153,13 @@ const ContactPage: React.FC = () => {
       {/* Floating Buttons */}
       <div className="fixed bottom-6 right-6 flex flex-col gap-4 z-50">
         <a
-          href="tel:+254700123456"
+          href="tel:+254722440643"
           className="bg-[#00b8e6] w-14 h-14 rounded-full flex items-center justify-center text-white shadow-lg hover:bg-[#001f3f]"
         >
           <Phone />
         </a>
         <a
-          href="https://wa.me/254700123456"
+          href="https://wa.me/254722440643"
           target="_blank"
           className="bg-[#00b8e6] w-14 h-14 rounded-full flex items-center justify-center text-white shadow-lg hover:bg-[#001f3f]"
         >
