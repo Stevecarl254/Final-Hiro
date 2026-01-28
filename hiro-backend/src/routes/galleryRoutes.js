@@ -1,5 +1,5 @@
 import express from "express";
-import Gallery from "../models/gallery.js";
+import Gallery from "../models/Gallery.js";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
