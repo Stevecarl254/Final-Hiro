@@ -1,61 +1,50 @@
-import mongoose from "mongoose";
+import { DataTypes } from "sequelize";
+import sequelize from "../config/database.js";
 
-// --- Equipment Item Subschema ---
-const EquipmentItemSchema = new mongoose.Schema({
-  id: {
-    type: String,
-    required: true,
-  },
-  name: {
-    type: String,
-    required: true,
-  },
-  quantity: {
-    type: Number,
-    required: true,
-    min: 1,
-  },
-});
-
-// --- Main Equipment Booking Schema ---
-const EquipmentBookingSchema = new mongoose.Schema(
+const EquipmentBooking = sequelize.define(
+  "EquipmentBooking",
   {
+    id: {
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
+      primaryKey: true,
+    },
     fullName: {
-      type: String,
-      required: true,
+      type: DataTypes.STRING,
+      allowNull: false,
       trim: true,
     },
     phone: {
-      type: String,
-      required: true,
+      type: DataTypes.STRING,
+      allowNull: false,
       trim: true,
     },
     location: {
-      type: String,
-      required: true,
+      type: DataTypes.STRING,
+      allowNull: false,
       trim: true,
     },
     date: {
-      type: Date,
-      required: true,
+      type: DataTypes.DATE,
+      allowNull: false,
     },
     items: {
-      type: [EquipmentItemSchema],
-      required: true,
-      validate: [(val) => val.length > 0, "At least one equipment item is required"],
+      type: DataTypes.JSONB,
+      allowNull: false,
+      validate: {
+        isArray(value) {
+          if (!Array.isArray(value) || value.length === 0) {
+            throw new Error("At least one equipment item is required");
+          }
+        },
+      },
     },
     status: {
-      type: String,
-      enum: ["pending", "approved", "rejected"],
-      default: "pending",
+      type: DataTypes.ENUM("pending", "approved", "rejected"),
+      defaultValue: "pending",
     },
   },
   { timestamps: true }
-);
-
-const EquipmentBooking = mongoose.model(
-  "EquipmentBooking",
-  EquipmentBookingSchema
 );
 
 export default EquipmentBooking;

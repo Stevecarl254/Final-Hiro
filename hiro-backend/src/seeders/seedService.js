@@ -1,6 +1,6 @@
-// src/scripts/serviceSeeder.js
-import mongoose from "mongoose";
+// src/seeders/seedService.js
 import dotenv from "dotenv";
+import { connectDB } from "../config/database.js";
 import Service from "../models/Service.js";
 
 dotenv.config();
@@ -9,34 +9,40 @@ const services = [
   {
     name: "Wedding Catering",
     description: "Full-service catering for weddings with menu customization.",
-    base_price: 80000,
+    basePrice: 80000,
   },
   {
     name: "Corporate Event",
     description: "Professional catering for company events, conferences, and galas.",
-    base_price: 60000,
+    basePrice: 60000,
   },
   {
     name: "Birthday Party",
     description: "Fun catering options for birthday celebrations.",
-    base_price: 30000,
+    basePrice: 30000,
   },
   {
     name: "Private Dinner",
     description: "Exclusive fine dining experiences at home or private venues.",
-    base_price: 20000,
+    basePrice: 20000,
   },
 ];
 
 const seedServices = async () => {
   try {
-    await mongoose.connect(process.env.MONGO_URI);
-    await Service.deleteMany();
-    await Service.insertMany(services);
+    // Connect to PostgreSQL database
+    await connectDB();
+    
+    // Delete all existing services
+    await Service.destroy({ where: {} });
+    
+    // Create new services
+    await Service.bulkCreate(services);
+    
     console.log("✅ Services seeded successfully!");
-    process.exit();
+    process.exit(0);
   } catch (error) {
-    console.error("❌ Error seeding services:", error);
+    console.error("❌ Error seeding services:", error.message);
     process.exit(1);
   }
 };

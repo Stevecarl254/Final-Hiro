@@ -19,12 +19,13 @@ router.post("/", async (req, res) => {
       message,
     });
 
-    // 🔔 notify admin
+    // notify admin
     const io = req.app.get("socketio");
     if (io) io.emit("newMessage", newMessage);
 
-    res.status(201).json({ message: "Message sent", data: newMessage });
+    res.status(201).json({ data: newMessage });
   } catch (err) {
+    console.error("CREATE MESSAGE ERROR:", err);
     res.status(500).json({ message: "Server error" });
   }
 });
@@ -32,9 +33,13 @@ router.post("/", async (req, res) => {
 /* GET – admin fetch messages */
 router.get("/", async (req, res) => {
   try {
-    const messages = await Message.find().sort({ createdAt: -1 });
+    const messages = await Message.findAll({
+      order: [["createdAt", "DESC"]],
+    });
+
     res.json({ data: messages });
-  } catch {
+  } catch (err) {
+    console.error("FETCH MESSAGES ERROR:", err);
     res.status(500).json({ message: "Failed to fetch messages" });
   }
 });
@@ -42,9 +47,17 @@ router.get("/", async (req, res) => {
 /* DELETE – admin delete */
 router.delete("/:id", async (req, res) => {
   try {
-    await Message.findByIdAndDelete(req.params.id);
+    const deleted = await Message.destroy({
+      where: { id: req.params.id },
+    });
+
+    if (!deleted) {
+      return res.status(404).json({ message: "Message not found" });
+    }
+
     res.json({ message: "Message deleted" });
-  } catch {
+  } catch (err) {
+    console.error("DELETE MESSAGE ERROR:", err);
     res.status(500).json({ message: "Delete failed" });
   }
 });

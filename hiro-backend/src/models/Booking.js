@@ -1,19 +1,41 @@
-import mongoose from "mongoose";
+// models/Booking.js
 
-const bookingSchema = new mongoose.Schema(
+import { DataTypes } from "sequelize";
+import sequelize from "../config/database.js";
+
+const Booking = sequelize.define(
+  "Booking",
   {
-    user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    staff: { type: mongoose.Schema.Types.ObjectId, ref: "Staff", required: true },
-    service: { type: mongoose.Schema.Types.ObjectId, ref: "Service", required: true },
-    date: { type: Date, required: true },
-    status: {
-      type: String,
-      enum: ["pending", "confirmed", "completed", "cancelled"],
-      default: "pending",
+    id: {
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
+      primaryKey: true,
     },
-    notes: { type: String },
+    userId: {
+      type: DataTypes.UUID,
+      allowNull: false,
+    },
+    staffId: {
+      type: DataTypes.UUID,
+      allowNull: true,
+    },
+    serviceId: {
+      type: DataTypes.UUID,
+      allowNull: true,
+    },
+    date: {
+      type: DataTypes.DATE,
+      allowNull: false,
+    },
+    status: {
+      type: DataTypes.ENUM("pending", "confirmed", "completed", "cancelled"),
+      defaultValue: "pending",
+    },
+    notes: {
+      type: DataTypes.TEXT,
+    },
   },
   { timestamps: true }
 );
 
-export default mongoose.model("Booking", bookingSchema);
+export default Booking;

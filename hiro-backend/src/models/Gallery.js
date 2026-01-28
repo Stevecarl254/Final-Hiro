@@ -1,14 +1,35 @@
-import mongoose from "mongoose";
+import { DataTypes } from "sequelize";
+import sequelize from "../config/database.js";
 
-const gallerySchema = new mongoose.Schema(
+const Gallery = sequelize.define(
+  "Gallery",
   {
-    title: { type: String, required: true },
-    description: { type: String, default: "" },
-    imageUrl: { type: String, required: true },
-    createdAt: { type: Date, default: Date.now },
+    id: {
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
+      primaryKey: true,
+    },
+    title: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    description: {
+      type: DataTypes.TEXT,
+      defaultValue: "",
+    },
+    imageUrl: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    createdAt: {
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW,
+    },
   },
-  { collection: "gallery" }
+  {
+    timestamps: false,
+    tableName: "gallery",
+  }
 );
 
-const Gallery = mongoose.model("Gallery", gallerySchema);
 export default Gallery;

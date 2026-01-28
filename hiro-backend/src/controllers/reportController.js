@@ -1,7 +1,9 @@
 // controllers/reportController.js
 import Booking from "../models/Booking.js";
 import Quote from "../models/Quote.js";
-import Equipment from "../models/EquipmentBooking.js";
+import EquipmentBooking from "../models/EquipmentBooking.js";
+import { Op } from "sequelize";
+import sequelize from "../config/database.js";
 
 /* ==========================
    Helper: format date to YYYY-MM-DD
@@ -17,26 +19,27 @@ const formatDate = (date) => {
 export const getBookingsReport = async (req, res) => {
   try {
     const { start, end } = req.query;
-    const filter = {};
+    const where = {};
 
     if (start || end) {
-      filter.createdAt = {};
-      if (start) filter.createdAt.$gte = new Date(start);
-      if (end) filter.createdAt.$lte = new Date(end);
+      where.createdAt = {};
+      if (start) where.createdAt[Op.gte] = new Date(start);
+      if (end) where.createdAt[Op.lte] = new Date(end);
     }
 
-    const bookings = await Booking.aggregate([
-      { $match: filter },
-      {
-        $group: {
-          _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
-          count: { $sum: 1 },
-        },
-      },
-      { $sort: { _id: 1 } },
-    ]);
+    const bookings = await Booking.findAll({
+      attributes: [
+        [sequelize.fn("DATE", sequelize.col("createdAt")), "date"],
+        [sequelize.fn("COUNT", sequelize.col("id")), "count"],
+      ],
+      where,
+      group: [sequelize.fn("DATE", sequelize.col("createdAt"))],
+      order: [["date", "ASC"]],
+      raw: true,
+      subQuery: false,
+    });
 
-    res.json(bookings.map(b => ({ date: b._id, count: b.count })));
+    res.json(bookings.map((b) => ({ date: formatDate(b.date), count: parseInt(b.count) })));
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Failed to fetch bookings report" });
@@ -49,26 +52,27 @@ export const getBookingsReport = async (req, res) => {
 export const getQuotesReport = async (req, res) => {
   try {
     const { start, end } = req.query;
-    const filter = {};
+    const where = {};
 
     if (start || end) {
-      filter.createdAt = {};
-      if (start) filter.createdAt.$gte = new Date(start);
-      if (end) filter.createdAt.$lte = new Date(end);
+      where.createdAt = {};
+      if (start) where.createdAt[Op.gte] = new Date(start);
+      if (end) where.createdAt[Op.lte] = new Date(end);
     }
 
-    const quotes = await Quote.aggregate([
-      { $match: filter },
-      {
-        $group: {
-          _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
-          count: { $sum: 1 },
-        },
-      },
-      { $sort: { _id: 1 } },
-    ]);
+    const quotes = await Quote.findAll({
+      attributes: [
+        [sequelize.fn("DATE", sequelize.col("createdAt")), "date"],
+        [sequelize.fn("COUNT", sequelize.col("id")), "count"],
+      ],
+      where,
+      group: [sequelize.fn("DATE", sequelize.col("createdAt"))],
+      order: [["date", "ASC"]],
+      raw: true,
+      subQuery: false,
+    });
 
-    res.json(quotes.map(q => ({ date: q._id, count: q.count })));
+    res.json(quotes.map((q) => ({ date: formatDate(q.date), count: parseInt(q.count) })));
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Failed to fetch quotes report" });
@@ -81,26 +85,36 @@ export const getQuotesReport = async (req, res) => {
 export const getEquipmentUsageReport = async (req, res) => {
   try {
     const { start, end } = req.query;
-    const filter = {};
+    const where = {};
 
     if (start || end) {
-      filter.createdAt = {};
-      if (start) filter.createdAt.$gte = new Date(start);
-      if (end) filter.createdAt.$lte = new Date(end);
+      where.createdAt = {};
+      if (start) where.createdAt[Op.gte] = new Date(start);
+      if (end) where.createdAt[Op.lte] = new Date(end);
     }
 
-    const equipmentUsage = await Equipment.aggregate([
-      { $match: filter },
-      {
-        $group: {
-          _id: "$name",
-          usageCount: { $sum: "$usageCount" }, // make sure your Equipment model has usageCount
-        },
-      },
-      { $sort: { usageCount: -1 } },
-    ]);
+    // Get all equipment bookings and aggregate by items
+    const equipmentBookings = await EquipmentBooking.findAll({
+      attributes: ["items"],
+      where,
+      raw: true,
+    });
 
-    res.json(equipmentUsage.map(e => ({ equipment: e._id, usageCount: e.usageCount })));
+    // Aggregate items
+    const itemsMap = {};
+    equipmentBookings.forEach((booking) => {
+      if (booking.items && Array.isArray(booking.items)) {
+        booking.items.forEach((item) => {
+          itemsMap[item.name] = (itemsMap[item.name] || 0) + item.quantity;
+        });
+      }
+    });
+
+    const equipmentUsage = Object.entries(itemsMap)
+      .map(([name, count]) => ({ equipment: name, usageCount: count }))
+      .sort((a, b) => b.usageCount - a.usageCount);
+
+    res.json(equipmentUsage);
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Failed to fetch equipment usage report" });

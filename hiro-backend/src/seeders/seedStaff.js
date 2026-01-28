@@ -1,73 +1,74 @@
 import dotenv from "dotenv";
-import mongoose from "mongoose";
-import Staff from "../models/Staff.js"
-import connectDB from "../config/db.js"
+import { connectDB } from "../config/database.js";
+import Staff from "../models/Staff.js";
 
 dotenv.config();
+
+// Initialize database connection
 await connectDB();
 
 const sampleStaff = [
     {
 	name: "Chef John Mwanjala",
-	role: "Chef",
+	role: "CHEF",
 	specialty: "Swahili dishes",
 	experience: "10 years in Pwani and Tanzania cuisine",
 	bio : "Let's enjoy Swahili flavors",
     },
     {
 	name: "Chef Aisha Jane",
-	role: "Chef",
+	role: "CHEF",
 	specialty: "African Fusion",
 	experience: "8 years of culinary artistry",
 	bio: "Creates bold African fusion menus with global influences.",
     },
     {
 	name: "Chef Daya Raj",
-	role: "Chef",
+	role: "CHEF",
 	specialty: "Indian Cuisine",
 	experience: "12 years in fine dining and event catering",
 	bio: "Expert in authentic Indian flavors with elegant presentation.",
     },
     {
 	name: "Chef Bigisa Damaris",
-	role: "Chef",
+	role: "CHEF",
 	specialty: "Modern African Foods",
 	experience: "9 years of culinary innovation",
 	bio: "Combines traditional African recipes with contemporary flair.",
     },
     {
 	name: "Alex Kimani",
-	role: "Head Waiter",
+	role: "HEAD_WAITER",
 	experience: "7 years leading event service teams",
 	bio: "Leads front-of-house staff ensuring seamless service at every event.",
     },
     {
 	name: "Jane Mwende",
-	role: "Head Waiter",
+	role: "HEAD_WAITER",
 	experience: "5 years in luxury catering",
 	bio: "Ensures every guest enjoys an unforgettable service experience.",
     },
     {
 	name: "Peter Otieno",
-	role: "Head Waiter",
+	role: "HEAD_WAITER",
 	experience: "6 years in banquet and fine dining events",
 	bio: "Expert in managing high-capacity dining experiences with precision.",
     },
     {
 	name: "Brian King",
-	role: "Mixologist",
+	role: "MIXOLOGIST",
 	experience: "3 years crafting signature cocktails",
 	bio: "Specializes in creating memorable drink experiences for events.",
     },
     {
 	name: "Mary Kyavulani",
-	role: "Decorator",
+	role: "DECORATOR",
 	experience: "8 years in event design and theming",
 	bio: "Transforms ordinary spaces into breathtaking event scenes.",
     },
     {
 	name: "David Ochieng",
-	role: "Photographer",
+	role: "PHOTOGRAPHER",
 	experience: "10 years capturing events and candid moments",
 	bio: "Storyteller through the lens — immortalizing every memory.",
     },
@@ -85,18 +86,22 @@ const sampleStaff = [
     },
     {
 	name: "Lucy Naliaka",
-	role: "Head Cleaner",
+	role: "HEAD_CLEANER",
 	experience: "15 years in event and hospitality cleaning",
 	bio: "Ensures every event space is spotless before, during, and after.",
     },
 ];
 
 try {
-    await Staff.deleteMany();
-    await Staff.insertMany(sampleStaff);
-    console.log("Staff profiles seedeed successfully!");
-    process.exit();
+    // Delete all existing staff
+    await Staff.destroy({ where: {} });
+    
+    // Create new staff records
+    await Staff.bulkCreate(sampleStaff);
+    
+    console.log("✅ Staff profiles seeded successfully!");
+    process.exit(0);
 } catch (error) {
-    console.error("❌ Error seeding staff:", error);
+    console.error("❌ Error seeding staff:", error.message);
     process.exit(1);
 }

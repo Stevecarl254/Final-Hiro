@@ -4,8 +4,9 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
 import cors from "cors";
-import connectDB from "./config/db.js";
+import { connectDB } from "./config/database.js";
 import { connectRedis } from "./config/redis.js";
+import { initializeAssociations } from "./models/index.js";
 import userRoutes from "./routes/userRoutes.js";
 import staffRoutes from "./routes/staffRoutes.js";
 import bookingRoutes from "./routes/bookingRoutes.js";
@@ -28,6 +29,7 @@ const startServer = async () => {
   try {
     await connectDB();
     await connectRedis();
+    initializeAssociations();
 
     const app = express();
 

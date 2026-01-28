@@ -1,31 +1,37 @@
-import mongoose from "mongoose"
+import { DataTypes } from "sequelize";
+import sequelize from "../config/database.js";
 
-const staffSchema = new mongoose.Schema(
-    {
-	name: { type: String, required: true },
-	role: {
-	    type: String,
-	    enum: [
-		"Chef",
-		"Head Waiter",
-		"Mixologist",
-		"Photographer",
-		"Decorator",
-		"MC",
-		"DJ",
-		"Head Cleaner",
-	    ],
-	    required: true,
-	},
-	specialty: { type: String },
-	experience: { type: String },
-	image_url: { type: String },
-	bio: { type: String },
-	isAvailable: {type: Boolean, default: true },
-	unavailableDates: [{ type: Date }],
-	addedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+const Staff = sequelize.define(
+  "Staff",
+  {
+    id: {
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
+      primaryKey: true,
     },
-    { timestamps: true }
+    name: { type: DataTypes.STRING, allowNull: false },
+    role: {
+      type: DataTypes.ENUM(
+        "Chef",
+        "Head Waiter",
+        "Mixologist",
+        "Photographer",
+        "Decorator",
+        "MC",
+        "DJ",
+        "Head Cleaner"
+      ),
+      allowNull: false,
+    },
+    specialty: { type: DataTypes.STRING },
+    experience: { type: DataTypes.STRING },
+    image_url: { type: DataTypes.STRING },
+    bio: { type: DataTypes.TEXT },
+    isAvailable: { type: DataTypes.BOOLEAN, defaultValue: true },
+    unavailableDates: { type: DataTypes.ARRAY(DataTypes.DATE), defaultValue: [] },
+    addedById: { type: DataTypes.UUID, allowNull: true }, // no references needed here
+  },
+  { timestamps: true }
 );
 
-export default mongoose.model("Staff", staffSchema);
+export default Staff;

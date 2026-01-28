@@ -5,9 +5,9 @@ import EquipmentBooking from "../models/EquipmentBooking.js";
 ================================ */
 export const createEquipmentBooking = async (req, res) => {
   try {
-    const { fullName, phone, location, eventDate, equipments } = req.body;
+    const { fullName, phone, location, date, items } = req.body;
 
-    if (!equipments || equipments.length === 0) {
+    if (!items || items.length === 0) {
       return res.status(400).json({
         success: false,
         message: "At least one equipment must be selected",
@@ -18,8 +18,8 @@ export const createEquipmentBooking = async (req, res) => {
       fullName,
       phone,
       location,
-      eventDate,
-      equipments,
+      date,
+      items,
     });
 
     // OPTIONAL: emit socket event
@@ -44,8 +44,9 @@ export const createEquipmentBooking = async (req, res) => {
 ================================ */
 export const getAllEquipmentBookings = async (req, res) => {
   try {
-    const bookings = await EquipmentBooking.find()
-      .sort({ createdAt: -1 });
+    const bookings = await EquipmentBooking.findAll({
+      order: [["createdAt", "DESC"]],
+    });
 
     res.status(200).json({
       success: true,
@@ -66,11 +67,7 @@ export const updateBookingStatus = async (req, res) => {
   try {
     const { status, notes } = req.body;
 
-    const booking = await EquipmentBooking.findByIdAndUpdate(
-      req.params.id,
-      { status, notes },
-      { new: true }
-    );
+    const booking = await EquipmentBooking.findByPk(req.params.id);
 
     if (!booking) {
       return res.status(404).json({
@@ -78,6 +75,10 @@ export const updateBookingStatus = async (req, res) => {
         message: "Booking not found",
       });
     }
+
+    booking.status = status;
+    if (notes) booking.notes = notes;
+    await booking.save();
 
     res.status(200).json({
       success: true,
@@ -97,7 +98,7 @@ export const updateBookingStatus = async (req, res) => {
 ================================ */
 export const deleteBooking = async (req, res) => {
   try {
-    await EquipmentBooking.findByIdAndDelete(req.params.id);
+    await EquipmentBooking.destroy({ where: { id: req.params.id } });
 
     res.status(200).json({
       success: true,
