@@ -5,7 +5,7 @@ import { fileURLToPath } from "url";
 import { dirname } from "path";
 import cors from "cors";
 import { connectDB } from "./config/database.js";
-import { connectRedis } from "./config/redis.js";
+// import { connectRedis } from "./config/redis.js"; // skip Redis for now
 import { initializeAssociations } from "./models/index.js";
 import userRoutes from "./routes/userRoutes.js";
 import staffRoutes from "./routes/staffRoutes.js";
@@ -27,29 +27,30 @@ const __dirname = dirname(__filename);
 
 const startServer = async () => {
   try {
+    // Connect to the database
     await connectDB();
-    await connectRedis();
+    // Skip Redis for now
+    // await connectRedis();
     initializeAssociations();
 
     const app = express();
 
-    // CORS configuration
+    // CORS config — update this if frontend is deployed somewhere
     const corsOptions = {
-      origin: 'http://localhost:3000',
-      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-      allowedHeaders: ['Content-Type', 'Authorization'],
+      origin: process.env.FRONTEND_URL || "*",
+      methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+      allowedHeaders: ["Content-Type", "Authorization"],
       credentials: true,
     };
     app.use(cors(corsOptions));
-
     app.use(express.json());
 
-    // Serve static files (uploads)
+    // Serve static uploads
     app.use(
-      '/uploads',
-      express.static(path.join(__dirname, 'uploads'), {
+      "/uploads",
+      express.static(path.join(__dirname, "uploads"), {
         setHeaders: (res) => {
-          res.setHeader('Cache-Control', 'public, max-age=31536000');
+          res.setHeader("Cache-Control", "public, max-age=31536000");
         },
       })
     );
@@ -65,20 +66,19 @@ const startServer = async () => {
     app.use("/api/equipment-bookings", equipmentBookingRoutes);
     app.use("/api/reports", reportRoutes);
 
-    // HTTP & Socket.IO setup
+    // Socket.IO
     const server = http.createServer(app);
     const io = new Server(server, {
-      cors: { origin: "http://localhost:3000", credentials: true },
+      cors: { origin: process.env.FRONTEND_URL || "*", credentials: true },
     });
 
-    // Socket.IO connection
     io.on("connection", (socket) => {
-      console.log("Admin connected:", socket.id);
+      console.log("Socket connected:", socket.id);
     });
 
-    // Make io accessible in routes
     app.set("socketio", io);
 
+    // Use Render-provided port
     const PORT = process.env.PORT || 5000;
     server.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
   } catch (err) {
