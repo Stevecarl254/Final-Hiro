@@ -3,16 +3,23 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-// Create a new Sequelize instance connected to PostgreSQL
 const sequelize = new Sequelize(
-  process.env.DB_NAME || "hiro_db",
-  process.env.DB_USER || "postgres",
-  process.env.DB_PASSWORD || "password",
+  process.env.DB_NAME,
+  process.env.DB_USER,
+  process.env.DB_PASSWORD,
   {
-    host: process.env.DB_HOST || "localhost",
-    port: process.env.DB_PORT || 5432,
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT,
     dialect: "postgres",
     logging: process.env.NODE_ENV === "development" ? console.log : false,
+
+    dialectOptions: {
+      ssl: {
+        require: true,
+        rejectUnauthorized: false, // REQUIRED for Neon
+      },
+    },
+
     pool: {
       max: 5,
       min: 0,
@@ -22,17 +29,15 @@ const sequelize = new Sequelize(
   }
 );
 
-// Test the connection
 export const connectDB = async () => {
   try {
     await sequelize.authenticate();
-    console.log("PostgreSQL connected successfully!");
+    console.log("✅ PostgreSQL connected successfully!");
 
-    // Sync models with database
-    await sequelize.sync({ alter: process.env.NODE_ENV === "development" });
-    console.log("Database synchronized!");
+    await sequelize.sync({ alter: false });
+    console.log("✅ Database synchronized!");
   } catch (error) {
-    console.error("Unable to connect to the database:", error.message);
+    console.error("❌ Unable to connect to the database:", error);
     process.exit(1);
   }
 };
