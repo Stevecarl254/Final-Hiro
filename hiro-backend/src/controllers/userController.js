@@ -8,7 +8,7 @@ const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 /* ================= REGISTER ================= */
 export const registerUser = async (req, res) => {
   try {
-    const { name, email, password, phoneNumber } = req.body;
+    const { name, email, password, phoneNumber, role } = req.body;
 
     if (!name || !email || !password || !phoneNumber) {
       return res.status(400).json({ message: "All fields are required" });
@@ -22,11 +22,21 @@ export const registerUser = async (req, res) => {
         .status(400)
         .json({ message: "Password must be at least 8 characters" });
 
+    // Check if email already exists
     const existing = await User.findOne({ where: { email } });
     if (existing)
       return res.status(400).json({ message: "Email already in use" });
 
-    const user = await User.create({ name, email, password, phoneNumber, role: "user" });
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const user = await User.create({
+      name,
+      email,
+      password: hashedPassword,
+      phoneNumber,
+      role: role && role.toLowerCase() === "admin" ? "admin" : "user", // allow admin creation
+    });
 
     res.status(201).json({
       message: "User registered successfully",
@@ -39,6 +49,7 @@ export const registerUser = async (req, res) => {
       },
     });
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
@@ -51,48 +62,55 @@ export const loginUser = async (req, res) => {
     if (!email || !password)
       return res.status(400).json({ message: "Email and password required" });
 
+    // Find user
     const user = await User.findOne({ where: { email } });
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    const isMatch = await user.comparePassword(password);
+    // Compare password
+    const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch)
-      return res.status(401).json({ message: "Invalid credentials" });
+      return res.status(401).json({ message: "Invalid email or password" });
 
     // Ensure role exists
     if (!user.role) user.role = "user";
 
+    // Generate JWT
     const token = generateToken(user.id, user.role);
 
-    // Send **full name** in the response for frontend
     res.status(200).json({
       message: "Login successful",
       token,
       user: {
         id: user.id,
-        name: user.name, // <-- full name returned
+        name: user.name,
         email: user.email,
         phoneNumber: user.phoneNumber,
         role: user.role,
       },
     });
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
 
 /* ================= GET PROFILE ================= */
 export const getCurrentUser = async (req, res) => {
-  // Ensure we return full name
-  res.status(200).json({
-    user: {
-      id: req.user.id,
-      name: req.user.name, // <-- full name included
-      email: req.user.email,
-      phoneNumber: req.user.phoneNumber,
-      address: req.user.address || "",
-      role: req.user.role,
-    },
-  });
+  try {
+    res.status(200).json({
+      user: {
+        id: req.user.id,
+        name: req.user.name,
+        email: req.user.email,
+        phoneNumber: req.user.phoneNumber,
+        address: req.user.address || "",
+        role: req.user.role,
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
 };
 
 /* ================= UPDATE PROFILE & PASSWORD ================= */
@@ -126,7 +144,7 @@ export const updateCurrentUser = async (req, res) => {
         });
       }
 
-      const isMatch = await user.comparePassword(currentPassword);
+      const isMatch = await bcrypt.compare(currentPassword, user.password);
       if (!isMatch)
         return res.status(401).json({ message: "Current password is incorrect." });
 
@@ -135,15 +153,13 @@ export const updateCurrentUser = async (req, res) => {
           message: "New password must be at least 8 characters.",
         });
 
-      const isSameAsCurrent = await user.comparePassword(newPassword);
+      const isSameAsCurrent = await bcrypt.compare(newPassword, user.password);
       if (isSameAsCurrent)
         return res.status(400).json({
           message: "New password cannot be the same as current password.",
         });
 
-      const salt = await bcrypt.genSalt(10);
-      user.password = await bcrypt.hash(newPassword, salt);
-
+      user.password = await bcrypt.hash(newPassword, 10);
       updated = true;
     }
 
