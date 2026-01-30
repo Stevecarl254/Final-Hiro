@@ -39,11 +39,8 @@ const startServer = async () => {
     // =========================
     // CORS (PRODUCTION SAFE)
     // =========================
-    // Allow configuring allowed origins from an environment variable so the
-    // hosted backend can accept requests from the deployed frontend domain.
-    // Example: ALLOWED_ORIGINS="https://your-frontend.com,https://www.your-frontend.com"
     const allowedOrigins = process.env.ALLOWED_ORIGINS
-      ? process.env.ALLOWED_ORIGINS.split(",").map((s) => s.trim())
+      ? process.env.ALLOWED_ORIGINS.split(",").map((s) => s.trim().replace(/\/$/, ""))
       : [
           "http://localhost:3000",
           "https://hirocateringandequipment.co.ke",
@@ -52,13 +49,15 @@ const startServer = async () => {
 
     const corsOptions = {
       origin: function (origin, callback) {
-        // Allow server-to-server, Postman, etc.
+        // allow server-to-server or Postman requests (origin undefined)
         if (!origin) return callback(null, true);
 
-        if (allowedOrigins.includes(origin)) {
+        const normalizedOrigin = origin.replace(/\/$/, "");
+        if (allowedOrigins.includes(normalizedOrigin)) {
           return callback(null, true);
         }
 
+        console.warn("Blocked by CORS:", origin);
         return callback(new Error("Not allowed by CORS"));
       },
       methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
@@ -130,8 +129,8 @@ const startServer = async () => {
     const PORT = process.env.PORT || 5000;
     server.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);
+      console.log("✅ Allowed Origins:", allowedOrigins);
     });
-
   } catch (err) {
     console.error("❌ Failed to start server:", err.message);
     process.exit(1);
