@@ -22,18 +22,16 @@ export const registerUser = async (req, res) => {
         .status(400)
         .json({ message: "Password must be at least 8 characters" });
 
-    // Check if email already exists
     const existing = await User.findOne({ where: { email } });
     if (existing)
       return res.status(400).json({ message: "Email already in use" });
 
-    // Let the User model hook handle password hashing. Pass the plain password
     const user = await User.create({
       name,
       email,
-      password: password,
+      password,
       phoneNumber,
-      role: role && role.toLowerCase() === "admin" ? "admin" : "user", // allow admin creation
+      role: role?.toLowerCase() === "admin" ? "admin" : "user",
     });
 
     res.status(201).json({
@@ -60,20 +58,17 @@ export const loginUser = async (req, res) => {
     if (!email || !password)
       return res.status(400).json({ message: "Email and password required" });
 
-    // Find user
     const user = await User.findOne({ where: { email } });
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    // Compare password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch)
       return res.status(401).json({ message: "Invalid email or password" });
 
-    // Ensure role exists
-    if (!user.role) user.role = "user";
+    // 🔒 DO NOT mutate role here — trust DB value
+    const role = user.role?.toLowerCase() || "user";
 
-    // Generate JWT
-    const token = generateToken(user.id, user.role);
+    const token = generateToken(user.id, role);
 
     res.status(200).json({
       message: "Login successful",
@@ -83,7 +78,7 @@ export const loginUser = async (req, res) => {
         name: user.name,
         email: user.email,
         phoneNumber: user.phoneNumber,
-        role: user.role,
+        role,
       },
     });
   } catch (error) {
@@ -137,8 +132,7 @@ export const updateCurrentUser = async (req, res) => {
     if (currentPassword || newPassword) {
       if (!currentPassword || !newPassword) {
         return res.status(400).json({
-          message:
-            "Both current and new passwords are required to change password.",
+          message: "Both current and new passwords are required to change password.",
         });
       }
 
@@ -157,7 +151,6 @@ export const updateCurrentUser = async (req, res) => {
           message: "New password cannot be the same as current password.",
         });
 
-      // Assign plain password; the model's beforeUpdate hook will hash it
       user.password = newPassword;
       updated = true;
     }
@@ -181,7 +174,9 @@ export const updateCurrentUser = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Failed to update profile", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Failed to update profile", error: error.message });
   }
 };
 
