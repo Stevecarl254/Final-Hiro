@@ -65,27 +65,20 @@ export const loginUser = async (req, res) => {
     if (!isMatch)
       return res.status(401).json({ message: "Invalid email or password" });
 
-    if (!user.role) user.role = "user";
+    // 🔒 DO NOT mutate role here — trust DB value
+    const role = user.role?.toLowerCase() || "user";
 
-    // Generate JWT
-    const token = generateToken(user.id, user.role);
-
-    // Set token as HTTP-only cookie
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    });
+    const token = generateToken(user.id, role);
 
     res.status(200).json({
       message: "Login successful",
+      token,
       user: {
         id: user.id,
         name: user.name,
         email: user.email,
         phoneNumber: user.phoneNumber,
-        role: user.role,
+        role,
       },
     });
   } catch (error) {
