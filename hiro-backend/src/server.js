@@ -39,31 +39,22 @@ const startServer = async () => {
     // =========================
     // CORS (PRODUCTION SAFE)
     // =========================
-    const allowedOrigins = process.env.ALLOWED_ORIGINS
-      ? process.env.ALLOWED_ORIGINS.split(",").map((s) => s.trim().replace(/\/$/, ""))
-      : [
-          "http://localhost:3000",
-          "https://hirocateringandequipment.co.ke",
-          "https://www.hirocateringandequipment.co.ke",
-        ];
+   const allowedOrigins = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(",").map(o => o.trim().replace(/\/$/, ""))
+  : ["https://hirocateringandequipment.co.ke", "https://www.hirocateringandequipment.co.ke"];
 
-    const corsOptions = {
-      origin: function (origin, callback) {
-        // allow server-to-server or Postman requests (origin undefined)
-        if (!origin) return callback(null, true);
-
-        const normalizedOrigin = origin.replace(/\/$/, "");
-        if (allowedOrigins.includes(normalizedOrigin)) {
-          return callback(null, true);
-        }
-
-        console.warn("Blocked by CORS:", origin);
-        return callback(new Error("Not allowed by CORS"));
-      },
-      methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-      allowedHeaders: ["Content-Type", "Authorization"],
-      credentials: true,
-    };
+const corsOptions = {
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true); // allow server-to-server
+    const normalizedOrigin = origin.replace(/\/$/, "");
+    if (allowedOrigins.includes(normalizedOrigin)) return callback(null, true);
+    console.warn("Blocked by CORS:", origin);
+    callback(new Error("Not allowed by CORS"));
+  },
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true,
+};
 
     app.use(cors(corsOptions));
     app.use(express.json());
