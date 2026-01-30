@@ -39,11 +39,16 @@ const startServer = async () => {
     // =========================
     // CORS (PRODUCTION SAFE)
     // =========================
-    const allowedOrigins = [
-      "http://localhost:3000",
-      "https://hirocateringandequipment.co.ke",
-      "https://www.hirocateringandequipment.co.ke",
-    ];
+    // Allow configuring allowed origins from an environment variable so the
+    // hosted backend can accept requests from the deployed frontend domain.
+    // Example: ALLOWED_ORIGINS="https://your-frontend.com,https://www.your-frontend.com"
+    const allowedOrigins = process.env.ALLOWED_ORIGINS
+      ? process.env.ALLOWED_ORIGINS.split(",").map((s) => s.trim())
+      : [
+          "http://localhost:3000",
+          "https://hirocateringandequipment.co.ke",
+          "https://www.hirocateringandequipment.co.ke",
+        ];
 
     const corsOptions = {
       origin: function (origin, callback) {
