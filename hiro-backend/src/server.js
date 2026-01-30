@@ -39,17 +39,26 @@ const startServer = async () => {
     // =========================
     // CORS (PRODUCTION SAFE)
     // =========================
-    const allowedOrigins = process.env.ALLOWED_ORIGINS
+    const rawOrigins = process.env.ALLOWED_ORIGINS
       ? process.env.ALLOWED_ORIGINS.split(",").map((s) => s.trim().replace(/\/$/, ""))
       : ["http://localhost:3000", "https://hirocateringandequipment.co.ke", "https://www.hirocateringandequipment.co.ke"];
 
+    // Normalize origins to allow both http & https
+    const allowedOrigins = [];
+    rawOrigins.forEach(origin => {
+      const withoutProtocol = origin.replace(/^https?:\/\//, "");
+      allowedOrigins.push(`http://${withoutProtocol}`);
+      allowedOrigins.push(`https://${withoutProtocol}`);
+    });
+
     const corsOptions = {
-      origin: function (origin, callback) {
-        console.log("Incoming Origin:", origin);
-        // allow server-to-server or Postman requests (origin undefined)
+      origin: function(origin, callback) {
+        // allow server-to-server requests (origin undefined)
         if (!origin) return callback(null, true);
 
-        const normalizedOrigin = origin.replace(/\/$/, "");
+        const normalizedOrigin = origin.replace(/\/$/, "").toLowerCase();
+        console.log("Incoming Origin:", origin);
+
         if (allowedOrigins.includes(normalizedOrigin)) {
           return callback(null, true);
         }
