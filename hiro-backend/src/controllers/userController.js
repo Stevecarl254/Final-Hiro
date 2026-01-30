@@ -27,13 +27,11 @@ export const registerUser = async (req, res) => {
     if (existing)
       return res.status(400).json({ message: "Email already in use" });
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
-
+    // Let the User model hook handle password hashing. Pass the plain password
     const user = await User.create({
       name,
       email,
-      password: hashedPassword,
+      password: password,
       phoneNumber,
       role: role && role.toLowerCase() === "admin" ? "admin" : "user", // allow admin creation
     });
@@ -159,7 +157,8 @@ export const updateCurrentUser = async (req, res) => {
           message: "New password cannot be the same as current password.",
         });
 
-      user.password = await bcrypt.hash(newPassword, 10);
+      // Assign plain password; the model's beforeUpdate hook will hash it
+      user.password = newPassword;
       updated = true;
     }
 
