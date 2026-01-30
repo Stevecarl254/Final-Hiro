@@ -1,0 +1,130 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// =========================
+// USERS
+// =========================
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  phone     String?
+  password  String
+  role      Role     @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  quotes   Quote[]
+  bookings EquipmentBooking[]
+  messages Message[]
+}
+
+// =========================
+// QUOTES
+// =========================
+
+model Quote {
+  id          Int         @id @default(autoincrement())
+  userId      Int
+  type        QuoteType
+  description String
+  eventDate   DateTime?
+  location    String?
+  amount      Int?
+  status      QuoteStatus @default(PENDING)
+  createdAt   DateTime    @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+// =========================
+// EQUIPMENT
+// =========================
+
+model Equipment {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String
+  pricePerDay Int
+  available   Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  bookings EquipmentBooking[]
+}
+
+// =========================
+// EQUIPMENT BOOKINGS
+// =========================
+
+model EquipmentBooking {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  equipmentId Int
+  startDate   DateTime
+  endDate     DateTime
+  status      BookingStatus @default(PENDING)
+  createdAt   DateTime @default(now())
+
+  user      User      @relation(fields: [userId], references: [id])
+  equipment Equipment @relation(fields: [equipmentId], references: [id])
+}
+
+// =========================
+// MESSAGES
+// =========================
+
+model Message {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  subject   String
+  content   String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+// =========================
+// GALLERY
+// =========================
+
+model Gallery {
+  id        Int      @id @default(autoincrement())
+  title     String
+  imageUrl  String
+  createdAt DateTime @default(now())
+}
+
+// =========================
+// ENUMS
+// =========================
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum QuoteType {
+  EVENT
+  EQUIPMENT_HIRE
+  EQUIPMENT_REPAIR
+  STAFF
+}
+
+enum QuoteStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+}
